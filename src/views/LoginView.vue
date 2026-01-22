@@ -9,14 +9,19 @@ const auth = useAuthStore();
 const router = useRouter();
 
 const submit = async () => {
-  await auth.login(email.value, password.value);
+  try {
+    await auth.login(email.value, password.value);
 
-  if (auth.user?.role === "admin") {
-    router.push("/admin");
-  } else {
-    router.push("/");
+    if (auth.user?.role === "admin") {
+      router.push("/admin");
+    } else {
+      router.push("/");
+    }
+  } catch {
+    alert("Login failed");
   }
 };
+
 </script>
 
 <template>
