@@ -40,20 +40,22 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to) => {
+router.beforeEach((to) => {
   const auth = useAuthStore();
+
+  if (to.name === "login") {
+    return true;
+  }
 
   if (to.meta.requiresAuth && !auth.token) {
     return { name: "login" };
   }
 
-  if (auth.token && !auth.user) {
-    await auth.fetchMe();
-  }
-
   if (to.meta.requiresAdmin && auth.user?.role !== "admin") {
     return { name: "home" };
   }
+
+  return true;
 });
 
 export default router;
