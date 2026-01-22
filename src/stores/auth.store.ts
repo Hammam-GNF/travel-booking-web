@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { loginApi, registerApi, logoutApi, meApi } from "../api/auth.api";
+import { loginApi, registerApi, logoutApi, meApi, refreshApi } from "../api/auth.api";
 import type { AuthUser } from "../types/auth";
 
 export const useAuthStore = defineStore("auth", {
@@ -16,28 +16,28 @@ export const useAuthStore = defineStore("auth", {
         const res = await loginApi({ email, password });
         this.token = res.data.access_token;
         if (this.token) {
-        localStorage.setItem("token", this.token);
+          localStorage.setItem("token", this.token);
         }
 
         await this.fetchMe();
-        } finally {
-            this.loading = false;
-        }
+      } finally {
+        this.loading = false;
+      }
     },
 
     async register(name: string, email: string, password: string) {
-        this.loading = true;
-        try {
-            const res = await registerApi({ name, email, password });
-            this.token = res.data.access_token;
-            if (this.token) {
-        localStorage.setItem("token", this.token);
+      this.loading = true;
+      try {
+        const res = await registerApi({ name, email, password });
+        this.token = res.data.access_token;
+        if (this.token) {
+          localStorage.setItem("token", this.token);
         }
 
         await this.fetchMe();
-        } finally {
-            this.loading = false;
-        }
+      } finally {
+        this.loading = false;
+      }
     },
     async logout() {
       await logoutApi();
@@ -49,6 +49,21 @@ export const useAuthStore = defineStore("auth", {
     async fetchMe() {
       const res = await meApi();
       this.user = res.data;
+    },
+
+    async refreshToken() {
+      this.loading = true;
+      try {
+        const res = await refreshApi();
+        this.token = res.data.access_token;
+        if (this.token) {
+          localStorage.setItem("token", this.token);
+        }
+
+        await this.fetchMe();
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });
