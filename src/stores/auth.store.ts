@@ -40,15 +40,25 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     async logout() {
-      await logoutApi();
-      this.token = null;
-      this.user = null;
-      localStorage.removeItem("token");
+      if (this.token) {
+        try {
+          await logoutApi();
+        } catch {
+          // ignore
+        }
+      }
+
+      this.clearAuth();
     },
 
     async fetchMe() {
-      const res = await meApi();
-      this.user = res.data;
+      try {
+        const res = await meApi();
+        this.user = res.data;
+      } catch (e) {
+        this.clearAuth();
+        throw e;
+      }
     },
 
     async refreshToken() {
@@ -64,6 +74,22 @@ export const useAuthStore = defineStore("auth", {
       } finally {
         this.loading = false;
       }
+    },
+
+    async initAuth() {
+      if (!this.token) return;
+
+      try {
+        await this.fetchMe();
+      } catch {
+        this.clearAuth();
+      }
+    },
+
+    clearAuth() {
+      this.token = null;
+      this.user = null;
+      localStorage.removeItem("token");
     },
   },
 });
