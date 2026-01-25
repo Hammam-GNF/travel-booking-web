@@ -9,18 +9,15 @@ const auth = useAuthStore();
 const router = useRouter();
 
 const submit = async () => {
-  try {
-    await auth.login(email.value, password.value);
+  await auth.login(email.value, password.value);
 
-    if (auth.user?.role === "admin") {
-      router.push("/admin");
-    } else {
-      router.push("/");
-    }
-  } catch {
-    alert("Login failed");
-  }
+  router.replace(
+    auth.isAdmin
+      ? { name: "admin-dashboard" }
+      : { name: "home" }
+  );
 };
+
 
 </script>
 
@@ -30,8 +27,11 @@ const submit = async () => {
 
     <form @submit.prevent="submit">
       <input v-model="email" type="email" placeholder="Email" />
+      <br />
       <input v-model="password" type="password" placeholder="Password" />
+      <br />
       <button type="submit">Login</button>
+      <p>Don't have an account? <router-link to="/register">Register</router-link></p>
     </form>
   </div>
 </template>

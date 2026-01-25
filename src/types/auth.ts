@@ -10,3 +10,15 @@ export interface AuthUser {
   email: string;
   role: "admin" | "user";
 }
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+export interface LoginPayload {
+  access_token: string;
+  expires_in: number;
+  user: AuthUser;
+}

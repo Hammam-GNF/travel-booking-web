@@ -24,6 +24,7 @@ const submit = async () => {
       <input v-model="email" type="email" placeholder="Email" />
       <input v-model="password" type="password" placeholder="Password" />
       <button type="submit">Register</button>
+      <p>Already have an account? <router-link to="/login">Login</router-link></p>
     </form>
   </div>
 </template>

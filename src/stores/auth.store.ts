@@ -7,78 +7,48 @@ export const useAuthStore = defineStore("auth", {
     token: localStorage.getItem("token"),
     user: null as AuthUser | null,
     loading: false,
+    initiailzed: false,
   }),
 
+  getters: {
+    isLoggedIn: (s) => !!s.token,
+    isAdmin: (s) => s.user?.role === "admin",
+  },
+
   actions: {
+    async register(name: string, email: string, password: string) {
+      this.loading = true;
+      try {
+        await registerApi({ name, email, password });
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async login(email: string, password: string) {
       this.loading = true;
       try {
         const res = await loginApi({ email, password });
-        this.token = res.data.access_token;
+
+        this.token = res.data.data.access_token;
+        this.user = res.data.data.user;
         if (this.token) {
           localStorage.setItem("token", this.token);
         }
-
-        await this.fetchMe();
+        this.initiailzed = true;
       } finally {
         this.loading = false;
       }
-    },
-
-    async register(name: string, email: string, password: string) {
-      this.loading = true;
-      try {
-        const res = await registerApi({ name, email, password });
-        this.token = res.data.access_token;
-        if (this.token) {
-          localStorage.setItem("token", this.token);
-        }
-
-        await this.fetchMe();
-      } finally {
-        this.loading = false;
-      }
-    },
-    async logout() {
-      if (this.token) {
-        try {
-          await logoutApi();
-        } catch {
-          // ignore
-        }
-      }
-
-      this.clearAuth();
     },
 
     async fetchMe() {
-      try {
-        const res = await meApi();
-        this.user = res.data;
-      } catch (e) {
-        this.clearAuth();
-        throw e;
-      }
-    },
-
-    async refreshToken() {
-      this.loading = true;
-      try {
-        const res = await refreshApi();
-        this.token = res.data.access_token;
-        if (this.token) {
-          localStorage.setItem("token", this.token);
-        }
-
-        await this.fetchMe();
-      } finally {
-        this.loading = false;
-      }
+      const res = await meApi();
+      this.user = res.data.data;
+      this.initiailzed = true;
     },
 
     async initAuth() {
-      if (!this.token) return;
-
+      if (!this.token || this.initiailzed) return;
       try {
         await this.fetchMe();
       } catch {
@@ -86,9 +56,26 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    async logout() {
+      try {
+        if (this.token) await logoutApi();
+      } finally {
+        this.clearAuth();
+      }
+    },
+
+    async refreshToken() {
+      const res = await refreshApi();
+      this.token = res.data.access_token;
+      if (this.token) {
+        localStorage.setItem("token", this.token);
+      }
+    },
+
     clearAuth() {
       this.token = null;
       this.user = null;
+      this.initiailzed = true;
       localStorage.removeItem("token");
     },
   },
