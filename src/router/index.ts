@@ -34,7 +34,7 @@ export const router = createRouter({
     {
       path: "/admin",
       component: AdminLayout,
-      meta: { requiresAuth: true, requiresAdmin: true },
+      meta: { requiresAuth: true, role: "admin" },
       children: [
         {
           path: "dashboard",
@@ -48,7 +48,7 @@ export const router = createRouter({
     {
       path: "/user",
       component: UserLayout,
-      meta: { requiresAuth: true, requiresAdmin: false },
+      meta: { requiresAuth: true, role: "user" },
       children: [
         {
           path: "dashboard",
@@ -75,7 +75,7 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore();
   const ispublicPages = ["login", "register"].includes(to.name as string);
   const requiresAuth = to.meta.requiresAuth === true;
-  const requiresAdmin = to.meta.requiresAdmin === true;
+  const requiredRole = to.meta.role as "admin" | "user" | undefined;
 
   // 1. Pastikan auth siap
   if (!auth.initiailzed) {
@@ -95,8 +95,10 @@ router.beforeEach(async (to) => {
   }
 
   // 4. Non-admin masuk admin
-  if (requiresAdmin && !auth.isAdmin) {
-    return { name: "home" };
+  if (requiredRole && auth.user?.role !== requiredRole) {
+    return auth.isAdmin
+      ? { name: "admin-dashboard" }
+      : { name: "home" };
   }
 
   return true;

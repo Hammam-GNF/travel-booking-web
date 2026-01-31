@@ -1,6 +1,5 @@
 import { api } from "./axios";
-import type { AuthTokenResponse, AuthUser } from "../types/auth";
-import type { ApiResponse, LoginPayload } from "../types/auth";
+import type {  AuthUser } from "../types/auth";
 
 export const registerApi = (payload: {
     name: string;

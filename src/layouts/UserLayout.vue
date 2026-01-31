@@ -1,6 +1,12 @@
+<script setup lang="ts">
+import UserNavbar from "../components/navigation/UserNavbar.vue";
+</script>
+
 <template>
   <div>
-    <header>User Layout</header>
-    <router-view />
+    <UserNavbar />
+    <main>
+      <router-view />
+    </main>
   </div>
 </template>
